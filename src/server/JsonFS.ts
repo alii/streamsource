@@ -48,10 +48,11 @@ export class JsonFS {
     const queryEntries = Object.entries(query);
 
     // Dear Robert, the owner of the TypeScript community.
-    // This is here because at runtime, somebody may edit and use req.body to post the ID
-    // So, to prevent that, I am checking if it exists at runtime
-    // Rather than compile time to prevent it. Thank you for not shouting
-    // At me for using ts-ignore
+    // This ts-ignore is here because at runtime, somebody may edit and use
+    // req.body to post the ID. So, to prevent that, I am checking if it
+    // exists at runtime rather than compile time to prevent it. Thank
+    // you for not shouting at me for using ts-ignore.
+
     // Kind regards,
     // Alistair Smith
 
@@ -68,10 +69,10 @@ export class JsonFS {
       });
 
       if (matched) {
-        const updated = {
+        const updated: Stream = {
           ...stream,
           ...update,
-        };
+        } as const;
 
         return [...streams, updated];
       } else {
