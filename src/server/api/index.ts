@@ -1,7 +1,7 @@
-import { Router, request } from 'express';
-import { JsonFS } from '../JsonFS';
-import { fall } from '../util';
 import { Stream } from '../interfaces/Stream';
+import { JsonFS } from '../JsonFS';
+import { Router } from 'express';
+import { fall } from '../util';
 
 export const router = Router();
 
@@ -50,9 +50,7 @@ router.put(
 
     res.json({
       error: false,
-      content: {
-        message: 'Successfully updated',
-      },
+      content: { message: 'Successfully updated' },
     });
   }),
 );
@@ -66,9 +64,7 @@ router.delete(
 
     res.json({
       error: false,
-      content: {
-        message: 'Success',
-      },
+      content: { message: 'Success' },
     });
   }),
 );
