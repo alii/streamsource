@@ -9,6 +9,10 @@ class NoStreamError extends Error {
 }
 
 type StreamObjectResult = Record<Stream['id'], Stream>;
+
+/**
+ * Union type, these are values that don't ever change
+ */
 type StreamStaticProperties = 'id';
 
 if (!fs.existsSync(file)) {
@@ -40,7 +44,7 @@ export class JsonFS {
    * @param query The query to find a stream
    * @param update The data to update in the stream
    */
-  static patch(query: Partial<Stream>, update: Partial<Omit<Stream, StreamStaticProperties>>) {
+  static patch(query: Partial<Stream>, update: Partial<Omit<Stream, StreamStaticProperties>>): void {
     const queryEntries = Object.entries(query);
 
     // Dear Robert, the owner of the TypeScript community.
@@ -51,6 +55,7 @@ export class JsonFS {
     // Kind regards,
     // Alistair Smith
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     if (update.id) {
       throw new Error('Cannot update ID of a stream.');

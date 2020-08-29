@@ -10,6 +10,7 @@ export interface Stream {
 export interface StreamElement {
   readonly x: number;
   readonly y: number;
+  readonly visible: boolean;
   readonly content: HTMLContent;
 }
 

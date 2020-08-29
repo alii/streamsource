@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, request } from 'express';
 import { JsonFS } from '../JsonFS';
 import { fall } from '../util';
 import { Stream } from '../interfaces/Stream';
@@ -15,6 +15,7 @@ router.all('/', (req, res) => {
     isFresh: req.fresh,
     isStale: req.stale,
     isSecure: req.secure,
+    protocol: req.protocol,
   });
 });
 
