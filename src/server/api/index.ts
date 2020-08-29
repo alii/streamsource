@@ -1,11 +1,14 @@
 import { Router } from 'express';
 import { JsonFS } from '../JsonFS';
+import { fall } from '../util';
+import { Stream } from '../interfaces/Stream';
 
 export const router = Router();
 
+type ReqIDParams = { id: string };
+
 router.all('/', (req, res) => {
   res.json({
-    hello: ['world'],
     timestamp: Date.now(),
     method: req.method,
     headers: req.headers,
@@ -15,28 +18,56 @@ router.all('/', (req, res) => {
   });
 });
 
-router.get('/streams/:id', (req, res) => {
-  const { id } = req.params;
-  const stream = JsonFS.find(id);
+router.get(
+  '/streams/:id',
+  fall<ReqIDParams, Stream>((req, res) => {
+    const { id } = req.params;
+    const stream = JsonFS.find(id);
 
-  if (!stream) {
-    return res.status(404).json({
-      error: true,
-      data: {
-        message: 'Could not find stream',
+    if (!stream) {
+      return res.status(404).json({
+        error: true,
+        content: {
+          message: 'Could not find stream',
+        },
+      });
+    }
+
+    res.json({
+      error: false,
+      content: stream,
+    });
+  }),
+);
+
+router.put(
+  '/streams/:id',
+  fall<ReqIDParams>((req, res) => {
+    const { id } = req.params;
+
+    JsonFS.patch({ id }, req.body);
+
+    res.json({
+      error: false,
+      content: {
+        message: 'Successfully updated',
       },
     });
-  }
+  }),
+);
 
-  res.json({
-    error: false,
-    data: stream,
-  });
-});
+router.delete(
+  '/streams/:id',
+  fall<ReqIDParams>((req, res) => {
+    const { id } = req.params;
 
-router.post('/streams/:id', (req, res) => {
-  const { id } = req.params;
+    JsonFS.delete(id);
 
-  JsonFS.patch({ id }, req.body);
-  res.status(200).end();
-});
+    res.json({
+      error: false,
+      content: {
+        message: 'Success',
+      },
+    });
+  }),
+);

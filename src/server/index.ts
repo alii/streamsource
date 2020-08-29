@@ -6,17 +6,15 @@ import * as path from 'path';
 const app = express();
 const apis: Record<string, express.Router> = { v1 } as const;
 
-const files = {
-  index: path.join(__dirname, 'index.html'),
-  view: path.join(__dirname, 'view.html'),
-} as const;
-
+app.use(express.json());
 app.use('/api', apis.v1);
 app.use('/v1', apis.v1);
 
-app.use(express.static(path.join(__dirname, 'client')));
+app.use(express.static(path.join(__dirname, '..', 'client')));
 
-app.listen(process.env.PORT ?? 8000, () => console.log('[BACKEND]: Ready'));
+app.listen(process.env.PORT ?? 8000, () => {
+  console.log('[BACKEND]: Ready');
+});
 
 JsonFS.create({
   elements: [],

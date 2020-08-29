@@ -1,4 +1,4 @@
-type HTMLContent = string;
+export type HTMLContent = string;
 
 export interface Stream {
   readonly height: number;

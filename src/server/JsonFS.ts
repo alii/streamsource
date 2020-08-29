@@ -2,13 +2,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Stream, StreamResolvable } from './interfaces/Stream';
 
-const file = process.env.STORAGE_PATH ?? path.join(__dirname, '..', 'store.json');
+const file = process.env.JSON_FS_STORAGE_PATH ?? path.join(__dirname, '..', 'store.json');
 
 class NoStreamError extends Error {
   readonly message: 'Could not find stream';
 }
 
 type StreamObjectResult = Record<Stream['id'], Stream>;
+type StreamStaticProperties = 'id';
 
 if (!fs.existsSync(file)) {
   fs.writeFileSync(file, '[]');
@@ -16,28 +17,18 @@ if (!fs.existsSync(file)) {
 
 export class JsonFS {
   /**
-   * Generates an ID
-   * @param length The length of the ID to generate
-   * @param alphabet The alphabet to choose characters from. Does not dedupe multiples!
-   * @private
-   */
-  private static _id(length = 20, alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'): string {
-    const arr = [...new Array(length)];
-
-    return arr.reduce((str) => {
-      return str + alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-    }, '');
-  }
-
-  /**
    * Pushes a stream to storage
    * @param stream
    */
-  static push(stream: Stream): void {
-    this._write([...this._read(), stream]);
+  static push(stream: Omit<Stream, StreamStaticProperties>): void {
+    this._write([...this._read(), this._form(stream)]);
   }
 
-  static create(stream: Omit<Stream, 'id'>): Stream {
+  /**
+   * Creates a stream
+   * @param stream The stream object, do not include id!!
+   */
+  static create(stream: Omit<Stream, StreamStaticProperties>): Stream {
     const id = this._id();
     const content: Stream = { ...stream, id };
     this.push(content);
@@ -49,7 +40,7 @@ export class JsonFS {
    * @param query The query to find a stream
    * @param update The data to update in the stream
    */
-  static patch(query: Partial<Stream>, update: Partial<Omit<Stream, 'id'>>) {
+  static patch(query: Partial<Stream>, update: Partial<Omit<Stream, StreamStaticProperties>>) {
     const queryEntries = Object.entries(query);
 
     // Dear Robert, the owner of the TypeScript community.
@@ -107,11 +98,33 @@ export class JsonFS {
   }
 
   /**
+   * Generates an ID
+   * @param length The length of the ID to generate
+   * @param alphabet The alphabet to choose characters from. Does not dedupe multiples!
+   * @private
+   */
+  private static _id(length = 20, alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'): string {
+    const arr = [...new Array(length)];
+
+    return arr.reduce((str) => {
+      return str + alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+    }, '');
+  }
+
+  /**
    * Push multiple streams to the store
    * @param streams
    */
-  static pushMultiple(streams: Stream[]): void {
-    this._write([...this._read(), ...streams]);
+  static pushMultiple(streams: Omit<Stream, StreamStaticProperties>[]): void {
+    this._write([...this._read(), ...streams.map(this._form)]);
+  }
+
+  /**
+   * Forms a stream object from
+   * @param stream The stream object
+   */
+  private static _form(stream: Omit<Stream, StreamStaticProperties>) {
+    return { ...stream, id: this._id() };
   }
 
   /**
@@ -138,10 +151,10 @@ export class JsonFS {
   }
 
   /**
-   * Filters and removes a stream from storage
+   * Finds and removes a stream from storage
    * @param _stream
    */
-  static filter(_stream: StreamResolvable): void {
+  static delete(_stream: StreamResolvable): void {
     const stream = this._resolve(_stream);
 
     if (!stream) {
