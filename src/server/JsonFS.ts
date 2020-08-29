@@ -70,7 +70,7 @@ export class JsonFS {
 
         return [...streams, updated];
       } else {
-        return streams;
+        return [...streams, stream];
       }
     }, [] as Stream[]);
 
